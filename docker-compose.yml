@@ -1,0 +1,56 @@
+# ===================================================
+# Ensemble des conteneurs 
+# ===================================================
+
+services:
+
+  # Premier conteneur
+
+  erp_source:
+
+    # Image docker récente de postgres qui sera automatiquement téléchargée si elle n'est pas présente sur mon poste
+    image: postgres:16
+
+    # nom du conteneur
+    container_name: erp_source
+
+    # le conteneur se re-lance lors du redémarrage du poste
+    restart: unless-stopped
+
+    # Variables d'environnement seront transmises à docker lors du premier lancement afin qu'il crée la base et l'utilisateur
+    environment:
+      POSTGRES_USER: ${ERP_SOURCE_USER}
+      POSTGRES_PASSWORD: ${ERP_SOURCE_PASSWORD}
+      POSTGRES_DB: ${ERP_SOURCE_DB}
+
+    # Passerelle réseau entre mon poste et le conteneur
+    ports:
+      - "5433:5432"
+
+    # Définition de l'emplacement (le volume) où le stockage sera persistant même si le conteneur est supprimé
+    volumes:
+      - erp_source_data:/var/lib/postgresql/data
+
+  # Deuxième conteneur et mêmes paramètres
+  dwh:
+
+    image: postgres:16
+
+    container_name: dwh
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${DWH_USER}
+      POSTGRES_PASSWORD: ${DWH_PASSWORD}
+      POSTGRES_DB: ${DWH_DB}
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - dwh_data:/var/lib/postgresql/data
+
+volumes:
+  erp_source_data:
+  dwh_data:
