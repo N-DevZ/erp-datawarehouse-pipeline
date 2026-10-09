@@ -16,7 +16,7 @@ CREATE TABLE clients (
     adresse             TEXT,
     code_postal         TEXT,
     ville               TEXT,
-    pays                TEXT NOT NULL DEFAULT 'FRANCE',
+    pays                TEXT NOT NULL DEFAULT 'France',
     segment             TEXT NOT NULL,
     date_creation       DATE NOT NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
