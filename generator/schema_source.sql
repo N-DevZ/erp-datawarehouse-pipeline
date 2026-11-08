@@ -91,7 +91,7 @@ CREATE INDEX idx_lignes_commande_id                 ON lignes_commande(commande_
 CREATE INDEX idx_factures_commande_id               ON factures(commande_id);
 
 -- ================================================================================
--- Horodatage technique : updated_at suit chaque chaque modification réelle d'une
+-- Horodatage technique : updated_at suit chaque modification réelle d'une
 -- seule fonction, partagée par les cinq tables. now() renvoie l'heure de 
 -- début de la transaction : toutes les lignes modifiées dans un même run portent
 -- donc exactement le même updated_at.
