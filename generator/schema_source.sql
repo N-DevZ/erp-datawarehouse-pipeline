@@ -89,3 +89,53 @@ CREATE INDEX idx_factures_updated_at                ON factures(updated_at);
 CREATE INDEX idx_commandes_client_id                ON commandes(client_id);
 CREATE INDEX idx_lignes_commande_id                 ON lignes_commande(commande_id);
 CREATE INDEX idx_factures_commande_id               ON factures(commande_id);
+
+-- ================================================================================
+-- Horodatage technique : updated_at suit chaque chaque modification réelle d'une
+-- seule fonction, partagée par les cinq tables. now() renvoie l'heure de 
+-- début de la transaction : toutes les lignes modifiées dans un même run portent
+-- donc exactement le même updated_at.
+-- ================================================================================
+
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW.updated_at := now();
+    RETURN NEW;
+END;
+$$;
+
+-- WHEN (OLD.* IS DISTINCT FROM NEW.*) : un UPDATE qui ne change rien ne touche
+-- pas updated_at. Sinon l'extraction incrémentale recopierait des lignes intactes.
+
+CREATE TRIGGER trg_clients_updated_at
+    BEFORE UPDATE ON clients
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_articles_updated_at
+    BEFORE UPDATE ON articles
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_commandes_updated_at
+    BEFORE UPDATE ON commandes
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_lignes_commande_updated_at
+    BEFORE UPDATE ON lignes_commande
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_factures_updated_at
+    BEFORE UPDATE ON factures
+    FOR EACH ROW
+    WHEN (OLD.* IS DISTINCT FROM NEW.*)
+    EXECUTE FUNCTION set_updated_at();
